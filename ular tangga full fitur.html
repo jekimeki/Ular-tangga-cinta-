@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ular Tangga Cinta💕</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #fff;
+            color: #4a1525;
+        }
+
+        /* Lobby / Menu Utama */
+        .lobby-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            background: #fff;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 2000;
+        }
+
+        .lobby-card {
+            background: #fff;
+            border: 2px solid #ff758f;
+            border-radius: 20px;
+            padding: 22px 20px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(255, 117, 143, 0.25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lobby-card h1 {
+            color: #ff4d6d;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+
+        .lobby-card .subtitle {
+            color: #d90429;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+
+        .lobby-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .btn-mulai {
+            background: linear-gradient(135deg, #ff4d6d, #d90429);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 25px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(217, 4, 41, 0.3);
+        }
+
+        .btn-klimaks {
+            background: linear-gradient(135deg, #7209b7, #3a0ca3);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 25px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(114, 9, 183, 0.3);
+        }
+
+        .btn-ldr {
+            background: linear-gradient(135deg, #00b4d8, #0077b6);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 25px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        }
+
+        .btn-mulai:active, .btn-klimaks:active, .btn-ldr:active, .btn-musik:active {
+            transform: scale(0.97);
+        }
+
+        .btn-musik {
+            background: #ffccd5;
+            color: #d90429;
+            border: none;
+            padding: 10px;
+            border-radius: 25px;
+            font-size: 0.88rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 204, 213, 0.5);
+        }
+
+        .lobby-note {
+            color: #d90429;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* Layout Game Utama */
+        .game-layout {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            height: 100%;
+            padding: 6px 10px;
+            background: #fff;
+        }
+
+        header {
+            text-align: center;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        header h1 {
+            color: #d90429;
+            font-size: 1.05rem;
+            margin: 0;
+            font-weight: 800;
+        }
+
+        .round-badge {
+            font-size: 0.7rem;
+            background: #ffe5ec;
+            color: #d90429;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: inline-block;
+            align-self: center;
+        }
+
+        .board-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            flex-grow: 1;
+            padding: 2px 0;
+            min-height: 0;
+        }
+
+        .board-wrapper {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            max-width: 100vw;
+            background-color: #d90429;
+            padding: 3px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(217, 4, 41, 0.25);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 1.5px;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .board-svg {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: calc(100% - 6px);
+            height: calc(100% - 6px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .cell {
+            background-color: #fff;
+            border-radius: 2px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1px;
+            font-size: clamp(0.35rem, 1.2vw, 0.48rem);
+            font-weight: bold;
+            position: relative;
+            border: 1px solid #ffccd5;
+            color: #d90429;
+        }
+
+        .cell.alt {
+            background-color: #fff0f3;
+        }
+
+        .cell span {
+            color: #800f2f;
+        }
+
+        .cell-icon {
+            font-size: clamp(1.0rem, 3.9vw, 0.6rem);
+            text-align: center;
+            line-height: 1;
+        }
+
+        /* Panel Kontrol */
+        .control-panel {
+            width: 100%;
+            max-width: 100%;
+            background: #fff0f3;
+            border: 1.5px solid #ffccd5;
+            border-radius: 10px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(217, 4, 41, 0.15);
+            flex-shrink: 0;
+            margin-bottom: 2px;
+        }
+
+        .player-badge {
+            padding: 5px 8px;
+            border-radius: 6px;
+            background: #fff;
+            border: 1px solid #ffccd5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            color: #800f2f;
+            font-weight: bold;
+            font-size: 0.6rem;
+            min-width: 70px;
+        }
+
+        .player-badge.active {
+            border-color: #d90429;
+            box-shadow: 0 0 6px rgba(217, 4, 41, 0.4);
+            background: #ffe5ec;
+        }
+
+        .dice-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .dice-btn {
+            width: 54px;
+            height: 54px;
+            border: 2.5px solid #fff;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background 0.3s ease;
+        }
+
+        .dice-btn.p1-turn {
+            background: linear-gradient(135deg, #ff4d6d, #d90429);
+        }
+
+        .dice-btn.p2-turn {
+            background: linear-gradient(135deg, #4ea8de, #3a86ff);
+        }
+
+        .dice-btn:active {
+            transform: scale(0.95);
+        }
+
+        .dadu-status-text {
+            font-size: 0.6rem;
+            font-weight: bold;
+            color: #800f2f;
+        }
+
+        .tokens-container {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            display: flex;
+            gap: 3px;
+            z-index: 10;
+        }
+
+        .token {
+            width: clamp(16px, 4.2vw, 24px);
+            height: clamp(16px, 4.2vw, 24px);
+            border-radius: 50%;
+            border: 2px solid white;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .token-1 { background-color: #ef233c; } /* Pria */
+        .token-2 { background-color: #3a86ff; } /* Wanita */
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(74, 21, 37, 0.75);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff0f3;
+            border: 2px solid #d90429;
+            padding: 14px 16px;
+            border-radius: 14px;
+            text-align: center;
+            max-width: 310px;
+            width: 90%;
+            box-shadow: 0 8px 25px rgba(89, 13, 34, 0.4);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            color: #d90429;
+            margin-top: 0;
+            font-size: 0.95rem;
+        }
+
+        .modal-content p {
+            font-size: 0.78rem;
+            color: #590d22;
+            line-height: 1.35;
+            margin: 6px 0;
+        }
+
+        .modal-illustration {
+            background: #ffe5ec;
+            border: 1px dashed #ff758f;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.72rem;
+            color: #800f2f;
+            margin: 6px 0;
+            text-align: left;
+        }
+
+        .modal-illustration strong {
+            color: #d90429;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .timer-display {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: #d90429;
+            margin: 6px 0;
+            background: #fff;
+            border: 1.5px dashed #ff758f;
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .btn-action-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-start-timer {
+            background: linear-gradient(135deg, #2b9348, #55a630);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 3px 10px rgba(43, 147, 72, 0.3);
+        }
+
+        .btn-action {
+            background: linear-gradient(45deg, #ef233c, #d90429);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .btn-skip {
+            background: linear-gradient(135deg, #d90429, #ef233c);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(217, 4, 41, 0.3);
+        }
+
+        .btn-lobby {
+            background: #3a0ca3;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOBBY UTAMA -->
+    <div class="lobby-container" id="lobby-screen">
+        <div class="lobby-card">
+            <h1>Ular Tangga Cinta 💕</h1>
+            <div class="subtitle">Pilih Mode Permainan</div>
+            
+            <div class="lobby-btn-group">
+                <button class="btn-mulai" onclick="startGame(1)">▶ Babak 1: Mode Klasik</button>
+                <button class="btn-klimaks" onclick="startGame(2)">⚡ Babak 2: 33 Misi & 3 Level</button>
+                <button class="btn-ldr" onclick="startGame(3)">📱 Babak 3:  LDR (Video Call)</button>
+                <button class="btn-musik" id="lobby-music-btn" onclick="toggleAudio()">🎵 Play Musik Latar</button>
+            </div>
+
+            <div class="lobby-note">*Pastikan mode "Silent" dimatikan</div>
+        </div>
+    </div>
+
+    <!-- LAYOUT UTAMA PERMAINAN -->
+    <div class="game-layout" id="game-screen">
+        <header>
+            <h1>ULAR TANGGA CINTA 💕</h1>
+            <div class="round-badge" id="round-indicator">Babak 1: Kejar Kemenangan</div>
+        </header>
+
+        <!-- Papan Game -->
+        <div class="board-container">
+            <div class="board-wrapper">
+                <svg class="board-svg" id="board-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <!-- 10 Ular & 10 Tangga -->
+                </svg>
+                <div class="board" id="board"></div>
+            </div>
+        </div>
+
+        <!-- Panel Kontrol -->
+        <div class="control-panel">
+            <div id="p1-card" class="player-badge active">
+                <span>❤️ Pria</span>
+                <span>Petak: <strong id="p1-pos">1</strong></span>
+            </div>
+
+            <div class="dice-area">
+                <div class="dice-btn p1-turn" id="dice-btn" onclick="rollDice()">🎲</div>
+                <div class="dadu-status-text" id="dice-result">Dadu: -</div>
+            </div>
+
+            <div id="p2-card" class="player-badge">
+                <span>💙 Wanita</span>
+                <span>Petak: <strong id="p2-pos">1</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tantangan & Timer -->
+    <div class="modal" id="challenge-modal">
+        <div class="modal-content">
+            <h3 id="modal-title">🔥 Sensasi Intim</h3>
+            <p id="modal-text">Tantangan akan muncul di sini...</p>
+            <div id="modal-illustration-container"></div>
+            <div class="timer-display" id="timer-box">2:00</div>
+            <div class="btn-action-group" id="modal-btn-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const BOARD_SIZE = 100;
+        let positions = [1, 1];
+        let currentPlayer = 0; // 0 = Pria, 1 = Wanita
+        let isRolling = false;
+        let currentRound = 1; 
+        const playerNames = ["Pria (Merah)", "Wanita (Biru)"];
+        let level3Collected = [0, 0]; 
+
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let bgmInterval = null;
+        let countdownInterval = null;
+        let isGameOver = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleAudio() {
+            initAudio();
+            if (isAudioPlaying) {
+                stopBGM();
+                document.getElementById('lobby-music-btn').innerText = "🎵 Play Musik Latar";
+                isAudioPlaying = false;
+            } else {
+                startBGM();
+                document.getElementById('lobby-music-btn').innerText = "🎵 Matikan Musik";
+                isAudioPlaying = true;
+            }
+        }
+
+        function startBGM() {
+            if (!audioCtx) return;
+            const melody = [261.63, 329.63, 392.00, 523.25, 220.00, 261.63, 329.63, 440.00];
+            let noteIdx = 0;
+
+            if (bgmInterval) clearInterval(bgmInterval);
+
+            bgmInterval = setInterval(() => {
+                if (!isAudioPlaying) return;
+                try {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(melody[noteIdx], audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.5);
+                    noteIdx = (noteIdx + 1) % melody.length;
+                } catch (e) {}
+            }, 450);
+        }
+
+        function stopBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        function playDiceSound() {
+            initAudio();
+            if (!audioCtx) return;
+            for (let i = 0; i < 4; i++) {
+                setTimeout(() => {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(200 + Math.random() * 300, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                }, i * 60);
+            }
+        }
+
+        function playStepSound() {
+            initAudio();
+            if (!audioCtx) return;
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(700, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function playAlarmSound() {
+            initAudio();
+            if (!audioCtx) return;
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                }, i * 250);
+            }
+        }
+
+        function startGame(round) {
+            initAudio();
+            currentRound = round;
+            positions = [1, 1];
+            level3Collected = [0, 0];
+            isGameOver = false;
+            
+            if (currentRound === 3) {
+                document.getElementById('round-indicator').innerText = "Babak 3:  Video Call";
+            } else if (currentRound === 2) {
+                document.getElementById('round-indicator').innerText = "Babak 2: 33 Misi & 3 Level";
+            } else {
+                document.getElementById('round-indicator').innerText = "Babak 1: Kejar Kemenangan";
+            }
+
+            document.getElementById('lobby-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            document.getElementById('dice-btn').setAttribute('onclick', 'rollDice()');
+            createBoard();
+        }
+
+        function backToLobby() {
+            closeModal();
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('lobby-screen').style.display = 'flex';
+        }
+
+        const round2Missions = {
+            3: "🌱 <b>[Level 1 - 1/11]</b> Saling tatap mata dan cium bibir kilat selama 15 detik.",
+            6: "🌱 <b>[Level 1 - 2/11]</b> Lepaskan aksesoris, perhiasan, atau kaus kaki yang kamu kenakan.",
+            10: "🌱 <b>[Level 1 - 3/11]</b> Berikan sentuhan lembut di paha bagian dalam pasangan selama 20 detik.",
+            13: "🌱 <b>[Level 1 - 4/11]</b> Tanggalkan atasan luar (jaket/cardigan/sweater) kamu.",
+            17: "🌱 <b>[Level 1 - 5/11]</b> saling usap area intim dari luar celana dalam(jika belum melepas celanadalam).",
+            20: "🌱 <b>[Level 1 - 6/11]</b> Tanggalkan baju utama (kemeja/kaos) kamu sekarang.",
+            23: "🌱 <b>[Level 1 - 7/11]</b> Tiup lembut area leher dan dada pasangan untuk memancing desahannya.",
+            26: "🌱 <b>[Level 1 - 8/11]</b> Lepaskan celana luar (celana panjang/rok) kamu.",
+            29: "🌱 <b>[Level 1 - 9/11]</b> Berikan ciuman basah di bagian pundak dan tulang selangka pasangan.",
+            31: "🌱 <b>[Level 1 - 10/11]</b> Sentuh dan elus bagian sensitif luar pasangan secara perlahan.",
+            33: "🌱 <b>[Level 1 - 11/11]</b> Lepaskan seluruh sisa pakaian luar terakhir. Bersiap masuk ke Level 2!",
+
+            36: "🔥 <b>[Level 2 - 1/11]</b> Berikan pijatan sensual di seluruh punggung dan pinggang pasangan tanpa busana.",
+            39: "🔥 <b>[Level 2 - 2/11]</b> Raba, usap, dan remas perlahan bagian dada atau payudara pasangan.",
+            43: "🔥 <b>[Level 2 - 3/11]</b> Lepaskan sisa pakaian dalam bagian atas secara perlahan dan penuh godaan.",
+            46: "🔥 <b>[Level 2 - 4/11]</b> Jilat dan kecup lembut area puting atau dada pasangan secara bergantian.",
+            50: "🔥 <b>[Level 2 - 5/11]</b> Sentuh area intim dan sensitif pasangan menggunakan jari untuk memicu pelumas alami.",
+            53: "🔥 <b>[Level 2 - 6/11]</b> Lakukan oral ringan pada bagian leher, dada, hingga perut bawah pasangan.",
+            56: "🔥 <b>[Level 2 - 7/11]</b> Posisikan wajahmu dekat dengan alat vital pasangan dan hirup aromanya.",
+            59: "🔥 <b>[Level 2 - 8/11]</b> Berikan jilatan atau sentuhan hangat langsung pada alat vital pasangan selama 30 detik.",
+            61: "🔥 <b>[Level 2 - 9/11]</b> Saling gesekkan tubuh tanpa busana untuk merasakan panasnya gairah.",
+            64: "🔥 <b>[Level 2 - 10/11]</b> Lepaskan seluruh pakaian dalam bagian bawah yang tersisa.",
+            66: "🔥 <b>[Level 2 - 11/11]</b> Lakukan penetrasi awal perlahan. Bersiap masuk ke Level 3!",
+
+            69: {
+                text: "💋 <b>[Level 3 - 1/11] Misionaris Klasik</b><br>Tatap mata pasangan lekat-lekat sambil memulai penyatuan perlahan.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Wanita berbaring telentang di kasur, pria di atas dengan posisi telungkup menopang tubuh dengan kedua tangan. Memungkinkan tatapan mata intens dan ciuman mesra."
+            },
+            72: {
+                text: "💋 <b>[Level 3 - 2/11] Cowgirl (Wanita di Atas)</b><br>Wanita memegang kendali penuh atas ritme dan kedalaman.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Pria berbaring telentang sepenuhnya, wanita duduk menghadap ke atas pangkuan pria, mengendalikan gerakan naik-turun dengan tumpuan lutut."
+            },
+            75: {
+                text: "💋 <b>[Level 3 - 3/11] Doggy Style</b><br>Penetrasi dari belakang dengan cengkeraman erat di pinggang.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Wanita merangkak bertumpu pada lutut dan siku/tangan dengan pinggul terangkat. Pria melakukan penetrasi dari belakang untuk sudut terdalam."
+            },
+            78: {
+                text: "💋 <b>[Level 3 - 4/11] Spooning (Menyendok)</b><br>Posisi berbaring miring berdampingan yang intim dan santai.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Kedua pasangan berbaring miring searah (saling memeluk). Pria melakukan penetrasi dari belakang secara santai dan sangat intim."
+            },
+            81: {
+                text: "💋 <b>[Level 3 - 5/11] Lotus Terkunci</b><br>Pria duduk bersila, wanita duduk di pangkuan saling merangkul erat.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Pria duduk bersila, wanita duduk di pangkuan melingkarkan kaki di pinggang pria sambil merangkul leher erat. Romantis dan bersentuhan napas."
+            },
+            84: {
+                text: "💋 <b>[Level 3 - 6/11] Bridge (Jembatan)</b><br>Wanita berbaring dengan pinggul diangkat tinggi untuk sudut penetrasi baru.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Wanita berbaring telentang di ujung kasur dengan bantal di bawah punggung, mengangkat pinggul ke atas. Pria berlutut di depannya."
+            },
+            87: {
+                text: "💋 <b>[Level 3 - 7/11] Standing (Berdiri)</b><br>Lakukan dengan bersandar di dinding kamar secara bergairah.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Punggung wanita bersandar di dinding, paha melingkar di pinggang pria yang menopang tubuhnya sambil berciuman liar."
+            },
+            90: {
+                text: "💋 <b>[Level 3 - 8/11] Reverse Cowgirl</b><br>Wanita di atas namun membelakangi pria, fokus pada ritme liar.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Pria berbaring telentang, wanita di atas mengangkang namun membelakangi wajah pria (menghadap ke kaki pria). Fokus visual luar biasa."
+            },
+            93: {
+                text: "💋 <b>[Level 3 - 9/11] Y-Shape / Edge of Bed</b><br>Berbaring di tepi tempat tidur dengan kaki diangkat ke bahu pria.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Wanita berbaring di tepi kasur, kaki diangkat ke atas bahu/lengan pria. Pria berdiri/berlutut di lantai untuk sudut ekstra dalam."
+            },
+            97: {
+                text: "💋 <b>[Level 3 - 10/11] Kombinasi Cepat</b><br>Percepat tempo dengan menggabungkan posisi favorit kalian secara bergantian!",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Transisi cepat dari misionaris ke doggy style atau posisi lain secara bergantian dalam tempo tinggi untuk memacu adrenalin."
+            },
+            100: {
+                text: "👑 <b>[Level 3 - 11/11] Klimaks Bersama!</b><br>Capai puncak orgasme bersamaan dalam pelukan erat yang penuh cinta.",
+                illustration: "<strong>Ilustrasi Posisi:</strong> Menyatukan tubuh dalam pelukan tererat (posisi lotus/misionaris erat), saling menatap, dan melepaskan orgasme bersamaan."
+            }
+        };
+
+        const ladderRewards = {
+            3: "🎁 <b>Bonus Tangga (Petak 3):</b> Dapatkan ekstra ciuman bibir penuh gairah dari pasanganmu!",
+            8: "🎁 <b>Bonus Tangga (Petak 8):</b> Hak istimewa: Bebas menyuruh pasangan membuka satu pakaian pilihannya.",
+            15: "🎁 <b>Bonus Tangga (Petak 15):</b> Dapatkan pijatan lembut di bagian tubuh mana pun.",
+            28: "🎁 <b>Bonus Tangga (Petak 28):</b> Diusap area intim.",
+            41: "🎁 <b>Bonus Tangga (Petak 41):</b> Dapatkan ciuman turun dari kening hingga bibir tanpa terburu-buru.",
+            50: "🎁 <b>Bonus Tangga (Petak 50):</b> Dapatkan oral di area intim (dengan mulut).",
+            63: "🎁 <b>Bonus Tangga (Petak 63):</b> pilih pakaian pasangan untuk di lepas.",
+            71: "🎁 <b>Bonus Tangga (Petak 71):</b> Dapat pijatan di kaki.",
+            78: "🎁 <b>Bonus Tangga (Petak 78):</b> pijatan kepala.",
+            85: "🎁 <b>Bonus Tangga (Petak 85):</b> Pijatan di pundak dan punggung."
+        };
+
+        const snakePunishments = {
+            18: "Berikan ciuman denda di kening pasangan sebanyak 10 kali..",
+            32: "🐍 <b>Hukuman Ular (Petak 32):</b> Pasangan berhak memberikan gigitan kecil gemas di pundak atau lehermu.",
+            47: "🐍 <b>Hukuman Ular (Petak 47):</b>Katakan 'Aku pasrah' dan biarkan pasangan meraba sesukanya  .",
+            58: "🐍 <b>Hukuman Ular (Petak 58):</b> Lepaskan satu pakain.",
+            66: "🐍 <b>Hukuman Ular (Petak 66):</b> Lakukan oral pada pada pasangan(dengan mulut).",
+            76: "🐍 <b>Hukuman Ular (Petak 76):</b> Jilat bagian intim pasangan.",
+            84: "🐍 <b>Hukuman Ular (Petak 84):</b> Mainkan puting pasangan.",
+            90: "🐍 <b>Hukuman Ular (Petak 90):</b> Berikan pijatan kaki pada pasangan.",
+            95: "🐍 <b>Hukuman Ular (Petak 95):</b> Mainkan bagian intim lawan.",
+            99: "🐍 <b>Hukuman Ular (Petak 99):</b> Kamu harus memainkan bagian intim mu sendiri."
+        };
+
+        // --- HADIAH & HUKUMAN LDR INTIM (BAGIAN 3) ---
+        const ldrLadderRewards = {
+            3: "📱🔥 <b>Bonus LDR Tangga (3):</b> Lepas seluruh pakaian atas di depan kamera, lalu berikan 10 ciuman udara basah ke layar.",
+            8: "📱🔥 <b>Bonus LDR Tangga (8):</b> Perintahkan pasangan membuka pakaian bawahnya setengah dan pamerkan paha di kamera selama 30 detik.",
+            15: "📱🔥 <b>Bonus LDR Tangga (15):</b> Buka kamera dari sudut bawah (low angle) sambil mendesah sensual memanggil nama pasangan.",
+            28: "📱🔥 <b>Bonus LDR Tangga (28):</b> Kirimkan video pendek berdurasi 10 detik saat kamu meremas payudara/dada atau alat vitalmu sendiri.",
+            41: "📱🔥 <b>Bonus LDR Tangga (41):</b> Petunjuk Visual Liar: Telanjangi tubuh bagian atas sepenuhnya di depan kamera sambil memejamkan mata menikmati bayangan pasangan.",
+            50: "📱🔥 <b>Bonus LDR Tangga (50):</b> Hak Veto: Suruh pasangan membuka seluruh pakaian celana/roknya dan perlihatkan area intimnya tanpa busana selama 20 detik!",
+            63: "📱🔥 <b>Bonus LDR Tangga (63):</b> Lakukan masturbasi virtual saling tonton: gesek-gesek area sensitif kalian berdua di depan kamera selama 1 menit.",
+            71: "📱🔥 <b>Bonus LDR Tangga (71):</b> Dekatkan kamera sekecil-kecilnya ke bibirmu, lalu lakukan simulasi ciuman basah mendalam ke arah lensa kamera.",
+            78: "📱🔥 <b>Bonus LDR Tangga (78):</b> Pamerkan lekuk tubuh atau postur tanpa busanamu secara utuh berputar 360 derajat di depan kamera.",
+            85: "📱🔥 <b>Bonus LDR Tangga (85):</b> Posisikan kamera tepat menghadap area intimmu yang terbuka dan biarkan pasangan menikmati pemandangannya selama 45 detik."
+        };
+
+        const ldrSnakePunishments = {
+            18: "📱🐍 <b>Hukuman Ular LDR (18):</b> Buka semua pakaian luar dan tunjukkan tubuh bagian atas tanpa penutup selama 20 detik.",
+            32: "📱🐍 <b>Hukuman Ular LDR (32):</b> Masukkan jari atau mainkan area intimmu sendiri di depan kamera sambil mendesah keras.",
+            47: "📱🐍 <b>Hukuman Ular LDR (47):</b> Hukuman Denda: Tanggalkan seluruh celana/pakaian dalam bawahmu dan biarkan terekspos di kamera.",
+            58: "📱🐍 <b>Hukuman Ular LDR (58):</b> Lakukan gerakan seolah-olah sedang melakukan penetrasi/masturbasi liar ke udara/bantal di depan kamera.",
+            66: "📱🐍 <b>Hukuman Ular LDR (66):</b> Kirimkan foto *close-up* tanpa sensor area intimmu langsung ke chat privat pasangan saat ini juga.",
+            76: "📱🐍 <b>Hukuman Ular LDR (76):</b> Beritahu detail fantasi terliar yang sedang ingin kamu lakukan ke alat vital pasangan malam ini dengan suara berbisik basah.",
+            84: "📱🐍 <b>Hukuman Ular LDR (84):</b> Buka paha lebar-lebar di depan kamera video call sambil memasukkan jari dan merangsang diri sendiri.",
+            90: "📱🐍 <b>Hukuman Ular LDR (90):</b> Wajib melakukan *finger/solo play* tanpa berhenti sampai giliran dadu berikutnya dimulai.",
+            95: "📱🐍 <b>Hukuman Ular LDR (95):</b> Telanjang bulat total tanpa sehelai benang pun di depan kamera dan tunjukkan seluruh tubuhmu.",
+            99: "📱🐍 <b>Hukuman Ular LDR (99):</b> Sanksi Maksimal: Capai klimaks/orgasme sendirian di depan kamera sekarang juga sambil menyebut nama pasangan!"
+        };
+
+        const specialTiles = {
+            3: { target: 22, type: 'ladder' },
+            8: { target: 34, type: 'ladder' },
+            15: { target: 44, type: 'ladder' },
+            28: { target: 59, type: 'ladder' },
+            41: { target: 72, type: 'ladder' },
+            50: { target: 69, type: 'ladder' },
+            63: { target: 81, type: 'ladder' },
+            71: { target: 92, type: 'ladder' },
+            78: { target: 96, type: 'ladder' },
+            85: { target: 97, type: 'ladder' },
+            
+            18: { target: 4, type: 'snake' },
+            32: { target: 12, type: 'snake' },
+            47: { target: 25, type: 'snake' },
+            58: { target: 39, type: 'snake' },
+            66: { target: 48, type: 'snake' },
+            76: { target: 53, type: 'snake' },
+            84: { target: 64, type: 'snake' },
+            90: { target: 73, type: 'snake' },
+            95: { target: 77, type: 'snake' },
+            99: { target: 82, type: 'snake' }
+        };
+
+        function getCellCoords(num) {
+            let row = Math.floor((num - 1) / 10);
+            let col = (num - 1) % 10;
+            if (row % 2 === 1) {
+                col = 9 - col;
+            }
+            let actualRow = 9 - row;
+            let x = (col * 10) + 5;
+            let y = (actualRow * 10) + 5;
+            return { x, y };
+        }
+
+        function drawBoardDecorations() {
+            const svg = document.getElementById('board-svg');
+            svg.innerHTML = '';
+
+            for (let start in specialTiles) {
+                let tile = specialTiles[start];
+                let s = getCellCoords(parseInt(start));
+                let e = getCellCoords(tile.target);
+
+                if (tile.type === 'ladder') {
+                    let angle = Math.atan2(e.y - s.y, e.x - s.x);
+                    let perpX = Math.sin(angle) * 1.5;
+                    let perpY = -Math.cos(angle) * 1.5;
+
+                    let r1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    r1.setAttribute('x1', s.x + perpX); r1.setAttribute('y1', s.y + perpY);
+                    r1.setAttribute('x2', e.x + perpX); r1.setAttribute('y2', e.y + perpY);
+                    r1.setAttribute('stroke', '#800f2f'); r1.setAttribute('stroke-width', '1');
+                    svg.appendChild(r1);
+
+                    let r2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    r2.setAttribute('x1', s.x - perpX); r2.setAttribute('y1', s.y - perpY);
+                    r2.setAttribute('x2', e.x - perpX); r2.setAttribute('y2', e.y - perpY);
+                    r2.setAttribute('stroke', '#800f2f'); r2.setAttribute('stroke-width', '1');
+                    svg.appendChild(r2);
+
+                    let steps = 5;
+                    for (let i = 1; i < steps; i++) {
+                        let t = i / steps;
+                        let cx = s.x + (e.x - s.x) * t;
+                        let cy = s.y + (e.y - s.y) * t;
+                        let rung = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        rung.setAttribute('x1', cx + perpX); rung.setAttribute('y1', cy + perpY);
+                        rung.setAttribute('x2', cx - perpX); rung.setAttribute('y2', cy - perpY);
+                        rung.setAttribute('stroke', '#800f2f'); rung.setAttribute('stroke-width', '0.8');
+                        svg.appendChild(rung);
+                    }
+                } else {
+                    let midX = (s.x + e.x) / 2 + (e.y - s.y) * 0.25;
+                    let midY = (s.y + e.y) / 2 - (e.x - s.x) * 0.25;
+
+                    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', `M ${s.x} ${s.y} Q ${midX} ${midY} ${e.x} ${e.y}`);
+                    path.setAttribute('stroke', '#2b9348');
+                    path.setAttribute('stroke-width', '2.8');
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke-linecap', 'round');
+                    svg.appendChild(path);
+
+                    let head = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    head.setAttribute('cx', s.x);
+                    head.setAttribute('cy', s.y);
+                    head.setAttribute('r', '2');
+                    head.setAttribute('fill', '#132a13');
+                    svg.appendChild(head);
+                }
+            }
+        }
+
+        function createBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+
+            for (let row = 9; row >= 0; row--) {
+                for (let col = 0; col < 10; col++) {
+                    let cellNum = (row % 2 === 1) ? (row * 10 + (10 - col)) : (row * 10 + (col + 1));
+
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    if ((row + col) % 2 === 1) {
+                        cell.classList.add('alt');
+                    }
+                    cell.id = `cell-${cellNum}`;
+
+                    let icon = '';
+                    if (specialTiles[cellNum]) {
+                        if (specialTiles[cellNum].type === 'ladder') {
+                            cell.classList.add('ladder');
+                            icon = currentRound === 3 ? '🔥🪜' : '🪜';
+                        } else {
+                            cell.classList.add('snake');
+                            icon = currentRound === 3 ? '🔥🐍' : '🐍';
+                        }
+                    } else if (currentRound === 2 && round2Missions[cellNum]) {
+                        icon = '✨'; 
+                    } else if (cellNum === 100) {
+                        icon = '👑';
+                    }
+
+                    cell.innerHTML = `
+                        <span>${cellNum}</span>
+                        <div class="cell-icon">${icon}</div>
+                        <div class="tokens-container" id="tokens-${cellNum}"></div>
+                    `;
+                    boardEl.appendChild(cell);
+                }
+            }
+            drawBoardDecorations();
+            updateTokens();
+        }
+
+        function updateTokens() {
+            for (let i = 1; i <= BOARD_SIZE; i++) {
+                let el = document.getElementById(`tokens-${i}`);
+                if (el) el.innerHTML = '';
+            }
+
+            positions.forEach((pos, idx) => {
+                const container = document.getElementById(`tokens-${pos}`);
+                if (container) {
+                    const token = document.createElement('div');
+                    token.className = `token token-${idx + 1}`;
+                    token.innerText = idx === 0 ? '♂' : '♀';
+                    container.appendChild(token);
+                }
+            });
+
+            document.getElementById('p1-pos').innerText = positions[0];
+            document.getElementById('p2-pos').innerText = positions[1];
+        }
+
+        function rollDice() {
+            if (isRolling || isGameOver) return;
+            isRolling = true;
+
+            playDiceSound();
+            document.getElementById('dice-result').innerText = `🎲...`;
+            
+            setTimeout(() => {
+                let diceVal = Math.floor(Math.random() * 6) + 1;
+                document.getElementById('dice-result').innerText = `Dadu: ${diceVal}`;
+                movePlayerAnimated(diceVal);
+            }, 300);
+        }
+
+        function movePlayerAnimated(steps) {
+            let p = currentPlayer;
+            let current = positions[p];
+            let tentativeTarget = current + steps;
+            let target;
+
+            if (tentativeTarget > BOARD_SIZE) {
+                let overflow = tentativeTarget - BOARD_SIZE;
+                target = BOARD_SIZE - overflow;
+            } else {
+                target = tentativeTarget;
+            }
+
+            let interval = setInterval(() => {
+                if (positions[p] < target) {
+                    positions[p]++;
+                    playStepSound();
+                    updateTokens();
+                } else if (positions[p] > target) {
+                    positions[p]--;
+                    playStepSound();
+                    updateTokens();
+                } else {
+                    clearInterval(interval);
+                    let finalPos = positions[p];
+                    
+                    if (currentRound === 2 && finalPos >= 67 && finalPos <= 100) {
+                        if (round2Missions[finalPos]) {
+                            if (level3Collected[p] < 11) {
+                                level3Collected[p]++;
+                            }
+                        }
+                    }
+
+                    if (currentRound === 2 && round2Missions[finalPos]) {
+                        setTimeout(() => {
+                            let mission = round2Missions[finalPos];
+                            let textContent = "";
+                            let illuContent = "";
+
+                            if (typeof mission === 'object') {
+                                textContent = mission.text;
+                                illuContent = mission.illustration;
+                            } else {
+                                textContent = mission;
+                            }
+
+                            showModal(`🌟 Misi Babak 2 (Petak ${finalPos}) [Terkumpul: ${level3Collected[p]}/11 Level 3]`, textContent, 120, illuContent);
+                            checkWin();
+                        }, 300);
+                    } else if (specialTiles[finalPos]) {
+                        setTimeout(() => {
+                            let tile = specialTiles[finalPos];
+                            let msg = "";
+                            let title = "";
+
+                            if (tile.type === 'snake') {
+                                if (currentRound === 3) {
+                                    title = `🔥⚠️ Hukuman LDR Hardcore (Petak ${finalPos})!`;
+                                    msg = ldrSnakePunishments[finalPos];
+                                } else {
+                                    title = `⚠️ Ujian Ular (Petak ${finalPos})!`;
+                                    msg = snakePunishments[finalPos];
+                                }
+                            } else {
+                                if (currentRound === 3) {
+                                    title = `🔥🎁 Bonus LDR Hardcore (Petak ${finalPos})!`;
+                                    msg = ldrLadderRewards[finalPos] + `<br><br><i>Naik ke petak ${tile.target}</i>`;
+                                } else {
+                                    title = `🎁 Bonus Tangga (Petak ${finalPos})!`;
+                                    msg = ladderRewards[finalPos] + `<br><br><i>Naik ke petak ${tile.target}</i>`;
+                                }
+                            }
+
+                            showModal(title, msg, 30, "");
+                            positions[p] = tile.target;
+                            updateTokens();
+                            checkWin();
+                        }, 300);
+                    } else {
+                        checkWin();
+                    }
+                }
+            }, 180);
+        }
+
+        function checkWin() {
+            if (positions[currentPlayer] === BOARD_SIZE) {
+                if (currentRound === 1) {
+                    isGameOver = true;
+                    let winner = playerNames[currentPlayer];
+                    let loser = playerNames[currentPlayer === 0 ? 1 : 0];
+                    let winMsg = `👑 <b>${winner} Memenangkan Babak 1!</b><br><br>` +
+                                 `🎁 <b>Hadiah Pemenang:</b> Bebas meminta pijatan penuh gairah selama 3 menit!<br>` +
+                                 `🔥 <b>Hukuman Yang Kalah (${loser}):</b> Wajib melepas seluruh bajunya sekarang!<br><br>` +
+                                 `<i>Nikmati waktu kalian selama 3 menit sebelum lanjut ke Babak 2!</i>`;
+                    
+                    showModal("✨ Grand Finale Babak 1 ✨", winMsg, 180, "", true);
+                } else if (currentRound === 3) {
+                    isGameOver = true;
+                    let winner = playerNames[currentPlayer];
+                    showModal("🔥👑 Klimaks Sempurna LDR Malam Ini!", `Selamat! ${winner} mencapai petak 100 di Mode LDR Hardcore! 🔥 Sesi video call intim tanpa busana dan klimaks bersama sukses menutup malam kalian.`, 0, "", false, true);
+                } else {
+                    if (level3Collected[currentPlayer] < 11) {
+                        let sisa = 11 - level3Collected[currentPlayer];
+                        showModal("⚠️ Belum Cukup Misi!", `Kamu sudah di petak 100, tapi baru mengumpulkan <b>${level3Collected[currentPlayer]} dari 11 tantangan Level 3</b>.<br><br><i>Kamu masih kurang ${sisa} tantangan lagi! Teruskan permainan untuk melengkapinya.</i>`, 30, "");
+                        isRolling = false;
+                        return;
+                    }
+
+                    isGameOver = true;
+                    showModal("👑 Malam Milik Kalian Sempurna!", `Selamat! ${playerNames[currentPlayer]} menyelesaikan seluruh 11 misi Level 3 dengan luar biasa! 🔥 Sesi intim tanpa batas menanti kalian berdua.`, 0, "", false, true);
+                }
+                return;
+            }
+            switchTurn();
+            isRolling = false;
+        }
+
+        function switchTurn() {
+            currentPlayer = currentPlayer === 0 ? 1 : 0;
+            const diceBtn = document.getElementById('dice-btn');
+            
+            if (currentPlayer === 0) {
+                document.getElementById('p1-card').classList.add('active');
+                document.getElementById('p2-card').classList.remove('active');
+                diceBtn.className = "dice-btn p1-turn";
+            } else {
+                document.getElementById('p2-card').classList.add('active');
+                document.getElementById('p1-card').classList.remove('active');
+                diceBtn.className = "dice-btn p2-turn";
+            }
+        }
+
+        let currentTimerSeconds = 120;
+        let isRound1WinModal = false;
+
+        function showModal(title, text, seconds = 120, illustration = "", isRound1Win = false, isFinalWin = false) {
+            document.getElementById('modal-title').innerHTML = title;
+            document.getElementById('modal-text').innerHTML = text;
+            
+            const illuContainer = document.getElementById('modal-illustration-container');
+            if (illustration) {
+                illuContainer.innerHTML = `<div class="modal-illustration">${illustration}</div>`;
+            } else {
+                illuContainer.innerHTML = '';
+            }
+
+            document.getElementById('challenge-modal').style.display = 'flex';
+
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            const timerBox = document.getElementById('timer-box');
+            const btnGroup = document.getElementById('modal-btn-container');
+
+            if (isFinalWin) {
+                timerBox.style.display = 'none';
+                btnGroup.innerHTML = `
+                    <button class="btn-action" onclick="backToLobby()">🏠 Kembali ke Lobi</button>
+                `;
+                return;
+            }
+
+            currentTimerSeconds = seconds;
+            isRound1WinModal = isRound1Win;
+
+            let m = Math.floor(seconds / 60);
+            let s = seconds % 60;
+            timerBox.style.display = 'block';
+            timerBox.innerText = m > 0 ? `${m}:${s < 10 ? '0' : ''}${s}` : `${seconds}s`;
+
+            btnGroup.innerHTML = `
+                <button class="btn-start-timer" onclick="startTimerCountdown()">▶ Mulai Tantangan</button>
+                <button class="btn-skip" onclick="closeModal()">Skip ⏭</button>
+            `;
+        }
+
+        function startTimerCountdown() {
+            const timerBox = document.getElementById('timer-box');
+            const btnGroup = document.getElementById('modal-btn-container');
+
+            btnGroup.innerHTML = `
+                <button class="btn-skip" onclick="closeModal()">Skip ⏭</button>
+            `;
+
+            let timeLeft = currentTimerSeconds;
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    let min = Math.floor(timeLeft / 60);
+                    let sec = timeLeft % 60;
+                    timerBox.innerText = min > 0 ? `${min}:${sec < 10 ? '0' : ''}${sec}` : `${timeLeft}s`;
+                } else {
+                    timerBox.innerText = "Waktu Selesai! 🎉";
+                    clearInterval(countdownInterval);
+                    playAlarmSound();
+                    
+                    if (isRound1WinModal) {
+                        currentRound = 2;
+                        positions = [1, 1];
+                        level3Collected = [0, 0];
+                        isGameOver = false;
+                        document.getElementById('round-indicator').innerText = "Babak 2: 33 Misi & 3 Level";
+                        createBoard(); 
+                    }
+
+                    btnGroup.innerHTML = `
+                        <button class="btn-action" onclick="closeModal()">Lanjutkan ✨</button>
+                    `;
+                }
+            }, 1000);
+        }
+
+        function closeModal() {
+            if (countdownInterval) clearInterval(countdownInterval);
+            document.getElementById('challenge-modal').style.display = 'none';
+
+            if (currentRound === 1 && document.getElementById('modal-title').innerText.includes("Grand Finale")) {
+                currentRound = 2;
+                positions = [1, 1];
+                level3Collected = [0, 0];
+                isGameOver = false;
+                document.getElementById('round-indicator').innerText = "Babak 2: 33 Misi & 3 Level";
+                createBoard();
+            }
+
+            isRolling = false;
+        }
+    </script>
+</body>
+</html>
