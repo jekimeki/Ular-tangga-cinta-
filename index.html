@@ -482,8 +482,6 @@
 
                 positions[p] = target;
                 let finalPos = positions[p];
-                
-                // BERGANTI GILIRAN DI SINI
                 let nextPlayer = currentPlayer === 0 ? 1 : 0;
                 let specialEvent = null;
 
@@ -493,20 +491,21 @@
                     positions[p] = tile.target;
                 }
 
-                // Kirim posisi baru DAN giliran pemain berikutnya ke database
+                updateTokens();
+
                 if (isOnlineMode) {
                     window.setDoc(window.doc(window.db, "rooms", roomCode), {
                         positions: positions,
-                        currentPlayer: nextPlayer, // Giliran diperbarui!
+                        currentPlayer: nextPlayer,
                         lastDice: diceVal
+                    }).then(() => {
+                        handleSpecialEvent(finalPos, specialEvent);
                     });
                 } else {
                     currentPlayer = nextPlayer;
                     updateTurnUI();
+                    handleSpecialEvent(finalPos, specialEvent);
                 }
-
-                updateTokens();
-                handleSpecialEvent(finalPos, specialEvent);
             }, 300);
         }
 
