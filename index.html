@@ -56,7 +56,9 @@
         .room-card { background: #fff; padding: 20px; border-radius: 15px; width: 90%; max-width: 320px; text-align: center; border: 2px solid #0077b6; }
         .room-card h3 { color: #0077b6; margin-bottom: 10px; font-size: 1rem; }
         .room-card input, .room-card select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; text-align: center; font-size: 0.9rem; }
-        #share-link-box { font-size: 0.7rem; word-break: break-all; background: #f0f8ff; padding: 6px; border-radius: 6px; margin: 8px 0; border: 1px dashed #0077b6; display: none; }
+        
+        #share-link-box { font-size: 0.7rem; word-break: break-all; background: #f0f8ff; padding: 8px; border-radius: 6px; margin: 8px 0; border: 1px dashed #0077b6; display: none; text-align: left; }
+        .btn-copy { background: #2b9348; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; cursor: pointer; margin-top: 5px; width: 100%; }
 
         .game-layout { display: none; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; height: 100%; padding: 6px 10px; background: #fff; }
         header { text-align: center; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -119,15 +121,21 @@
 
     <div class="room-modal" id="room-modal">
         <div class="room-card">
-            <h3>Buat / Masuk Ruangan LDR</h3>
+            <h3>Buat Ruangan LDR Online</h3>
             <input type="text" id="input-room-code" placeholder="Nama Ruangan (Contoh: sayangku)" />
             <select id="input-my-role">
                 <option value="0">Peran: Pria (❤️ - Host)</option>
                 <option value="1">Peran: Wanita (💙 - Guest)</option>
             </select>
-            <div id="share-link-box">Salin Link ini & kirim ke pasangan:<br><b id="generated-link"></b></div>
-            <div class="btn-action-group">
-                <button class="btn-action" onclick="generateAndJoinRoom()">Buat Link & Main</button>
+            
+            <div id="share-link-box">
+                <b>Link Khusus Pasangan:</b><br>
+                <span id="generated-link" style="user-select: text;"></span>
+                <button class="btn-copy" onclick="copyShareLink()">📋 Salin Link</button>
+            </div>
+
+            <div class="btn-action-group" id="room-btn-group">
+                <button class="btn-action" onclick="generateRoomLink()">Buat Link Ruangan</button>
                 <button class="btn-lobby" onclick="closeRoomModal()">Batal</button>
             </div>
         </div>
@@ -190,24 +198,26 @@
         let roomCode = "";
         let myRole = 0; 
 
-        // Cek otomatis jika dibuka dari link yang dikirim pasangan
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const roomParam = urlParams.get('room');
             const roleParam = urlParams.get('role');
             if (roomParam) {
                 roomCode = roomParam;
-                myRole = roleParam ? parseInt(roleParam) : 1; // Otomatis jadi Guest (Wanita) jika dari link
+                myRole = roleParam ? parseInt(roleParam) : 1;
                 isOnlineMode = true;
                 startGame(3);
                 listenToRoom();
             }
         });
 
-        function openRoomModal() { document.getElementById('room-modal').style.display = 'flex'; }
+        function openRoomModal() { 
+            document.getElementById('share-link-box').style.display = 'none';
+            document.getElementById('room-modal').style.display = 'flex'; 
+        }
         function closeRoomModal() { document.getElementById('room-modal').style.display = 'none'; }
 
-        function generateAndJoinRoom() {
+        function generateRoomLink() {
             const codeInput = document.getElementById('input-room-code').value.trim();
             myRole = parseInt(document.getElementById('input-my-role').value);
             
@@ -216,27 +226,45 @@
             roomCode = codeInput;
             isOnlineMode = true;
 
-            // Buat link khusus untuk dibagikan ke pasangan (jika Host)
             const baseUrl = window.location.origin + window.location.pathname;
             const partnerRole = myRole === 0 ? 1 : 0;
             const shareLink = `${baseUrl}?room=${roomCode}&role=${partnerRole}`;
 
-            document.getElementById('share-link-box').style.display = 'block';
             document.getElementById('generated-link').innerText = shareLink;
+            document.getElementById('share-link-box').style.display = 'block';
 
-            // Inisialisasi room di Firestore jika belum ada
+            // Ubah tombol bawah menjadi tombol masuk ruangan setelah link dibuat
+            document.getElementById('room-btn-group').innerHTML = `
+                <button class="btn-action" onclick="enterRoomDirectly()">Masuk ke Ruangan 🚀</button>
+            `;
+
+            // Daftarkan room ke Firestore
             const docRef = window.doc(window.db, "rooms", roomCode);
             window.getDoc(docRef).then((docSnap) => {
                 if (!docSnap.exists()) {
                     window.setDoc(docRef, { positions: [1, 1], currentPlayer: 0, lastDice: '-' });
                 }
             });
+        }
 
-            setTimeout(() => {
-                closeRoomModal();
-                startGame(3);
-                listenToRoom();
-            }, 1500);
+        function copyShareLink() {
+            const linkText = document.getElementById('generated-link').innerText;
+            navigator.clipboard.writeText(linkText).then(() => {
+                alert("Link berhasil disalin! Silakan kirimkan ke WhatsApp pasanganmu.");
+            }).catch(err => {
+                alert("Gagal menyalin link secara otomatis. Silakan salin manual.");
+            });
+        }
+
+        function enterRoomDirectly() {
+            closeRoomModal();
+            // Kembalikan tombol modal ke semula untuk penggunaan berikutnya
+            document.getElementById('room-btn-group').innerHTML = `
+                <button class="btn-action" onclick="generateRoomLink()">Buat Link Ruangan</button>
+                <button class="btn-lobby" onclick="closeRoomModal()">Batal</button>
+            `;
+            startGame(3);
+            listenToRoom();
         }
 
         function listenToRoom() {
