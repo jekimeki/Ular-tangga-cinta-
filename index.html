@@ -7,7 +7,7 @@
     <!-- Firebase SDK v10 (Firestore) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAYhOTQe9LWwcNjQBjJ4DKIxf3GPHhho7Y",
@@ -21,7 +21,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        window.db = db; window.doc = doc; window.setDoc = setDoc; window.onSnapshot = onSnapshot; window.getDoc = getDoc;
+        window.db = db; window.doc = doc; window.setDoc = setDoc; window.onSnapshot = onSnapshot; window.getDoc = getDoc; window.updateDoc = updateDoc;
     </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -233,12 +233,10 @@
             document.getElementById('generated-link').innerText = shareLink;
             document.getElementById('share-link-box').style.display = 'block';
 
-            // Ubah tombol bawah menjadi tombol masuk ruangan setelah link dibuat
             document.getElementById('room-btn-group').innerHTML = `
                 <button class="btn-action" onclick="enterRoomDirectly()">Masuk ke Ruangan 🚀</button>
             `;
 
-            // Daftarkan room ke Firestore
             const docRef = window.doc(window.db, "rooms", roomCode);
             window.getDoc(docRef).then((docSnap) => {
                 if (!docSnap.exists()) {
@@ -258,7 +256,6 @@
 
         function enterRoomDirectly() {
             closeRoomModal();
-            // Kembalikan tombol modal ke semula untuk penggunaan berikutnya
             document.getElementById('room-btn-group').innerHTML = `
                 <button class="btn-action" onclick="generateRoomLink()">Buat Link Ruangan</button>
                 <button class="btn-lobby" onclick="closeRoomModal()">Batal</button>
@@ -485,6 +482,8 @@
 
                 positions[p] = target;
                 let finalPos = positions[p];
+                
+                // BERGANTI GILIRAN DI SINI
                 let nextPlayer = currentPlayer === 0 ? 1 : 0;
                 let specialEvent = null;
 
@@ -494,12 +493,16 @@
                     positions[p] = tile.target;
                 }
 
+                // Kirim posisi baru DAN giliran pemain berikutnya ke database
                 if (isOnlineMode) {
                     window.setDoc(window.doc(window.db, "rooms", roomCode), {
                         positions: positions,
-                        currentPlayer: nextPlayer,
+                        currentPlayer: nextPlayer, // Giliran diperbarui!
                         lastDice: diceVal
                     });
+                } else {
+                    currentPlayer = nextPlayer;
+                    updateTurnUI();
                 }
 
                 updateTokens();
