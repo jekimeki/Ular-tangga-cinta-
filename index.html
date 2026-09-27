@@ -76,14 +76,15 @@
         .cell-icon { font-size: clamp(1.0rem, 3.9vw, 0.6rem); text-align: center; line-height: 1; }
 
         .control-panel { width: 100%; background: #fff0f3; border: 1.5px solid #ffccd5; border-radius: 10px; padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; margin-bottom: 2px; }
-        .player-badge { padding: 5px 8px; border-radius: 6px; background: #fff; border: 1px solid #ffccd5; display: flex; flex-direction: column; align-items: center; gap: 1px; color: #800f2f; font-weight: bold; font-size: 0.6rem; min-width: 70px; }
+        .player-badge { padding: 5px 8px; border-radius: 6px; background: #fff; border: 1px solid #ffccd5; display: flex; flex-direction: column; align-items: center; gap: 1px; color: #800f2f; font-weight: bold; font-size: 0.6rem; min-width: 60px; }
         .player-badge.active { border-color: #d90429; box-shadow: 0 0 6px rgba(217, 4, 41, 0.4); background: #ffe5ec; }
 
         .dice-area { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .dice-btn { width: 54px; height: 54px; border: 2.5px solid #fff; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
+        .dice-btn { width: 48px; height: 48px; border: 2px solid #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: white; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); }
         .dice-btn.p1-turn { background: linear-gradient(135deg, #ff4d6d, #d90429); }
         .dice-btn.p2-turn { background: linear-gradient(135deg, #4ea8de, #3a86ff); }
-        .dadu-status-text { font-size: 0.6rem; font-weight: bold; color: #800f2f; }
+        .dadu-status-text { font-size: 0.55rem; font-weight: bold; color: #800f2f; }
+        .btn-sync { background: #0077b6; color: white; border: none; padding: 3px 6px; border-radius: 5px; font-size: 0.55rem; font-weight: bold; cursor: pointer; margin-top: 2px; }
 
         .tokens-container { position: absolute; bottom: 2px; right: 2px; display: flex; gap: 3px; z-index: 10; }
         .token { width: clamp(16px, 4.2vw, 24px); height: clamp(16px, 4.2vw, 24px); border-radius: 50%; border: 2px solid white; font-size: 11px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
@@ -162,6 +163,7 @@
             <div class="dice-area">
                 <div class="dice-btn p1-turn" id="dice-btn" onclick="rollDice()">🎲</div>
                 <div class="dadu-status-text" id="dice-result">Dadu: -</div>
+                <button class="btn-sync" onclick="manualSync()">🔄 Sinkronkan</button>
             </div>
             <div id="p2-card" class="player-badge">
                 <span>💙 Wanita</span>
@@ -277,6 +279,24 @@
                     }
                     updateTokens();
                     updateTurnUI();
+                }
+            });
+        }
+
+        function manualSync() {
+            if (!isOnlineMode) return;
+            const docRef = window.doc(window.db, "rooms", roomCode);
+            window.getDoc(docRef).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    positions = data.positions || [1, 1];
+                    currentPlayer = data.currentPlayer !== undefined ? data.currentPlayer : 0;
+                    if (data.lastDice !== undefined) {
+                        document.getElementById('dice-result').innerText = `Dadu: ${data.lastDice}`;
+                    }
+                    updateTokens();
+                    updateTurnUI();
+                    alert("Status game berhasil disinkronkan!");
                 }
             });
         }
@@ -577,7 +597,7 @@
         function closeModal() {
             if (countdownInterval) clearInterval(countdownInterval);
             document.getElementById('challenge-modal').style.display = 'none';
-            isRolling = false;
+            isRolling, isRolling = false;
         }
     </script>
 </body>
