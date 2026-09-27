@@ -4,8 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ular Tangga Cinta - Hardcore & LDR Online 💕</title>
-    <!-- Memuat PeerJS Library -->
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <!-- Firebase SDK v10 (Firestore) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYhOTQe9LWwcNjQBjJ4DKIxf3GPHhho7Y",
+            authDomain: "ular-tangga-a3b8e.firebaseapp.com",
+            projectId: "ular-tangga-a3b8e",
+            storageBucket: "ular-tangga-a3b8e.firebasestorage.app",
+            messagingSenderId: "740763353864",
+            appId: "1:740763353864:web:06d7cf87df5042618722bd",
+            measurementId: "G-6J46FTSNBZ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db; window.doc = doc; window.setDoc = setDoc; window.onSnapshot = onSnapshot; window.getDoc = getDoc;
+    </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
@@ -39,7 +56,7 @@
         .room-card { background: #fff; padding: 20px; border-radius: 15px; width: 90%; max-width: 320px; text-align: center; border: 2px solid #0077b6; }
         .room-card h3 { color: #0077b6; margin-bottom: 10px; font-size: 1rem; }
         .room-card input, .room-card select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; text-align: center; font-size: 0.9rem; }
-        #connection-status { font-size: 0.75rem; color: #d90429; margin-top: 5px; font-weight: bold; min-height: 20px; }
+        #share-link-box { font-size: 0.7rem; word-break: break-all; background: #f0f8ff; padding: 6px; border-radius: 6px; margin: 8px 0; border: 1px dashed #0077b6; display: none; }
 
         .game-layout { display: none; flex-direction: column; align-items: center; justify-content: space-between; width: 100%; height: 100%; padding: 6px 10px; background: #fff; }
         header { text-align: center; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -93,7 +110,7 @@
             <div class="lobby-btn-group">
                 <button class="btn-mulai" onclick="startGame(1)">▶ Babak 1: Mode Klasik (Offline)</button>
                 <button class="btn-klimaks" onclick="startGame(2)">⚡ Babak 2: 33 Misi (Offline)</button>
-                <button class="btn-ldr" onclick="openRoomModal()">📱 Babak 3: Hardcore LDR (Online)</button>
+                <button class="btn-ldr" onclick="openRoomModal()">📱 Babak 3: Hardcore LDR (Online via Link)</button>
                 <button class="btn-musik" id="lobby-music-btn" onclick="toggleAudio()">🎵 Play Musik Latar</button>
             </div>
             <div class="lobby-note">*Pastikan mode "Silent" dimatikan</div>
@@ -102,15 +119,15 @@
 
     <div class="room-modal" id="room-modal">
         <div class="room-card">
-            <h3>Gabung Ruangan LDR Online</h3>
-            <input type="text" id="input-room-code" placeholder="Kode Ruangan (Contoh: cinta99)" />
+            <h3>Buat / Masuk Ruangan LDR</h3>
+            <input type="text" id="input-room-code" placeholder="Nama Ruangan (Contoh: sayangku)" />
             <select id="input-my-role">
-                <option value="0">Pilih Peran: Pria (❤️ - Host)</option>
-                <option value="1">Pilih Peran: Wanita (💙 - Guest)</option>
+                <option value="0">Peran: Pria (❤️ - Host)</option>
+                <option value="1">Peran: Wanita (💙 - Guest)</option>
             </select>
-            <div id="connection-status">Status: Masukkan kode & hubungkan</div>
+            <div id="share-link-box">Salin Link ini & kirim ke pasangan:<br><b id="generated-link"></b></div>
             <div class="btn-action-group">
-                <button class="btn-action" onclick="connectOnlineRoom()">Hubungkan & Main</button>
+                <button class="btn-action" onclick="generateAndJoinRoom()">Buat Link & Main</button>
                 <button class="btn-lobby" onclick="closeRoomModal()">Batal</button>
             </div>
         </div>
@@ -119,7 +136,7 @@
     <div class="game-layout" id="game-screen">
         <header>
             <h1>ULAR TANGGA CINTA 💕</h1>
-            <div class="round-badge" id="round-indicator">Babak 1: Kejar Kemenangan</div>
+            <div class="round-badge" id="round-indicator">Babak 3: Online LDR</div>
         </header>
 
         <div class="board-container">
@@ -159,8 +176,9 @@
         let positions = [1, 1];
         let currentPlayer = 0; 
         let isRolling = false;
-        let currentRound = 1; 
+        let currentRound = 3; 
         const playerNames = ["Pria (Merah)", "Wanita (Biru)"];
+        let unsubFirestore = null;
 
         let audioCtx = null;
         let isAudioPlaying = false;
@@ -169,89 +187,73 @@
         let isGameOver = false;
 
         let isOnlineMode = false;
-        let peer = null;
-        let conn = null;
+        let roomCode = "";
         let myRole = 0; 
+
+        // Cek otomatis jika dibuka dari link yang dikirim pasangan
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomParam = urlParams.get('room');
+            const roleParam = urlParams.get('role');
+            if (roomParam) {
+                roomCode = roomParam;
+                myRole = roleParam ? parseInt(roleParam) : 1; // Otomatis jadi Guest (Wanita) jika dari link
+                isOnlineMode = true;
+                startGame(3);
+                listenToRoom();
+            }
+        });
 
         function openRoomModal() { document.getElementById('room-modal').style.display = 'flex'; }
         function closeRoomModal() { document.getElementById('room-modal').style.display = 'none'; }
 
-        function connectOnlineRoom() {
+        function generateAndJoinRoom() {
             const codeInput = document.getElementById('input-room-code').value.trim();
             myRole = parseInt(document.getElementById('input-my-role').value);
             
-            if (!codeInput) { alert("Masukkan kode ruangan!"); return; }
+            if (!codeInput) { alert("Masukkan nama ruangan!"); return; }
 
-            document.getElementById('connection-status').innerText = "Membuat koneksi PeerJS...";
+            roomCode = codeInput;
+            isOnlineMode = true;
 
-            const peerId = "ular-cinta-" + codeInput + (myRole === 0 ? "-host" : "-guest");
-            if (peer) peer.destroy();
+            // Buat link khusus untuk dibagikan ke pasangan (jika Host)
+            const baseUrl = window.location.origin + window.location.pathname;
+            const partnerRole = myRole === 0 ? 1 : 0;
+            const shareLink = `${baseUrl}?room=${roomCode}&role=${partnerRole}`;
 
-            // Menggunakan server publik PeerJS yang stabil
-            peer = new Peer(peerId, {
-                host: '0.peerjs.com',
-                port: 443,
-                secure: true
-            });
+            document.getElementById('share-link-box').style.display = 'block';
+            document.getElementById('generated-link').innerText = shareLink;
 
-            peer.on('open', (id) => {
-                document.getElementById('connection-status').innerText = "ID Siap. Menghubungkan ke pasangan...";
-                
-                if (myRole === 1) {
-                    const hostId = "ular-cinta-" + codeInput + "-host";
-                    conn = peer.connect(hostId);
-                    setupConnection();
+            // Inisialisasi room di Firestore jika belum ada
+            const docRef = window.doc(window.db, "rooms", roomCode);
+            window.getDoc(docRef).then((docSnap) => {
+                if (!docSnap.exists()) {
+                    window.setDoc(docRef, { positions: [1, 1], currentPlayer: 0, lastDice: '-' });
                 }
             });
 
-            peer.on('connection', (incomingConn) => {
-                conn = incomingConn;
-                setupConnection();
-            });
-
-            peer.on('error', (err) => {
-                document.getElementById('connection-status').innerText = "Gagal terhubung! Cek kode/jaringan.";
-            });
+            setTimeout(() => {
+                closeRoomModal();
+                startGame(3);
+                listenToRoom();
+            }, 1500);
         }
 
-        function setupConnection() {
-            if (!conn) return;
-
-            conn.on('open', () => {
-                document.getElementById('connection-status').innerText = "Berhasil Terhubung! Membuka game...";
-                setTimeout(() => {
-                    closeRoomModal();
-                    isOnlineMode = true;
-                    startGame(3);
-                }, 800);
-            });
-
-            conn.on('data', (data) => {
-                positions = data.positions;
-                currentPlayer = data.currentPlayer;
-                document.getElementById('dice-result').innerText = `Dadu: ${data.lastDice}`;
-                updateTokens();
-                updateTurnUI();
-
-                if (data.specialEvent) {
-                    let se = data.specialEvent;
-                    let title = se.type === 'snake' ? `📱⚠️ Hukuman Ular LDR (${se.pos})!` : `📱🎁 Bonus Tangga LDR (${se.pos})!`;
-                    let msg = se.type === 'snake' ? ldrSnakePunishments[se.pos] : ldrLadderRewards[se.pos] + `<br><br><i>Naik ke petak ${se.target}</i>`;
-                    showModal(title, msg, 30);
+        function listenToRoom() {
+            const docRef = window.doc(window.db, "rooms", roomCode);
+            if (unsubFirestore) unsubFirestore();
+            unsubFirestore = window.onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    positions = data.positions || [1, 1];
+                    currentPlayer = data.currentPlayer !== undefined ? data.currentPlayer : 0;
+                    if (data.lastDice !== undefined) {
+                        document.getElementById('dice-result').innerText = `Dadu: ${data.lastDice}`;
+                    }
+                    updateTokens();
+                    updateTurnUI();
                 }
             });
-        }
-
-        function sendGameState(specialEvent = null) {
-            if (!conn || !isOnlineMode) return;
-            let nextPlayer = currentPlayer === 0 ? 1 : 0;
-            const payload = {
-                positions: positions,
-                currentPlayer: nextPlayer,
-                lastDice: document.getElementById('dice-result').innerText.replace("Dadu: ", ""),
-                specialEvent: specialEvent
-            };
-            conn.send(payload);
         }
 
         function initAudio() {
@@ -295,11 +297,14 @@
         function startGame(round) {
             initAudio();
             currentRound = round;
-            if (round !== 3) isOnlineMode = false;
+            if (round !== 3) {
+                isOnlineMode = false;
+                if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+            }
             positions = [1, 1];
             isGameOver = false;
             
-            document.getElementById('round-indicator').innerText = currentRound === 3 ? `Babak 3: Online LDR (PeerJS)` : "Babak 1 / 2";
+            document.getElementById('round-indicator').innerText = currentRound === 3 ? `Babak 3: Online LDR (Room: ${roomCode || 'Solo'})` : "Babak 1 / 2";
             document.getElementById('lobby-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'flex';
             createBoard();
@@ -308,7 +313,8 @@
         function backToLobby() {
             closeModal();
             isOnlineMode = false;
-            if (peer) peer.destroy();
+            if (unsubFirestore) { unsubFirestore(); unsubFirestore = null; }
+            window.history.replaceState({}, document.title, window.location.pathname);
             document.getElementById('game-screen').style.display = 'none';
             document.getElementById('lobby-screen').style.display = 'flex';
         }
@@ -451,12 +457,21 @@
 
                 positions[p] = target;
                 let finalPos = positions[p];
+                let nextPlayer = currentPlayer === 0 ? 1 : 0;
                 let specialEvent = null;
 
                 if (specialTiles[finalPos]) {
                     let tile = specialTiles[finalPos];
                     specialEvent = { type: tile.type, target: tile.target, pos: finalPos };
                     positions[p] = tile.target;
+                }
+
+                if (isOnlineMode) {
+                    window.setDoc(window.doc(window.db, "rooms", roomCode), {
+                        positions: positions,
+                        currentPlayer: nextPlayer,
+                        lastDice: diceVal
+                    });
                 }
 
                 updateTokens();
@@ -471,26 +486,21 @@
                     let msg = specialEvent.type === 'snake' ? ldrSnakePunishments[specialEvent.pos] : ldrLadderRewards[specialEvent.pos] + `<br><br><i>Naik ke petak ${specialEvent.target}</i>`;
                     showModal(title, msg, 30);
                     updateTokens();
-                    checkWin(specialEvent);
+                    checkWin();
                 }, 300);
             } else {
-                checkWin(null);
+                checkWin();
             }
             isRolling = false;
         }
 
-        function checkWin(specialEvent) {
+        function checkWin() {
             if (positions[currentPlayer] === BOARD_SIZE) {
                 isGameOver = true;
                 showModal("👑 Klimaks Sempurna LDR!", `Selamat! ${playerNames[currentPlayer]} menyelesaikan permainan dengan sempurna! 🔥`, 0, true);
+                return;
             }
-
-            if (isOnlineMode) {
-                sendGameState(specialEvent);
-            } else {
-                currentPlayer = currentPlayer === 0 ? 1 : 0;
-                updateTurnUI();
-            }
+            isRolling = false;
         }
 
         function showModal(title, text, seconds = 120, isFinalWin = false) {
